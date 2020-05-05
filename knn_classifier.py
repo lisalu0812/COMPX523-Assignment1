@@ -13,8 +13,8 @@ while n_samples < 5000:
     my_pred = knn.predict(X)
     if y[0] == my_pred[0]:
         corrects += 1
-        knn = knn.partial_fit(X, y)
-        n_samples += 1
+    knn = knn.partial_fit(X, y)
+    n_samples += 1
 # Displaying results
 #print('KNNClassifier usage example')
 print('{} samples analyzed.'.format(n_samples))
