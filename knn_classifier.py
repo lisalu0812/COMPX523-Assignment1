@@ -66,7 +66,10 @@ class MyKNNClassifier(KNNClassifier):
         X_std = X.std()
         standardization = (X-X_mean) / X_std
         return standardization
-'''
+
+
+
+r'''
 stream = FileStream(r"C:\Users\luyj0\OneDrive\Desktop\COMPX523-Data Stream Mining\data_n30000.csv")
 #knn = MyKNNClassifier(weighted_vote=True)
 s_knn = MyKNNClassifier(standardize=True)
@@ -78,10 +81,6 @@ evaluator = EvaluatePrequential(max_samples=30000,
                                 metrics=metrics)
 evaluator.evaluate(stream=stream,model=[s_knn],model_names=['KNN + standardize'])
 #evaluator.evaluate(stream=stream,model=[knn],model_names=['KNN'])
-
-'''
-
-'''
 # Setting up the stream
 stream = SEAGenerator(random_state=1, noise_percentage=.1)
 knn = MyKNNClassifier(weighted_vote=True)
