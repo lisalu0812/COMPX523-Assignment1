@@ -7,9 +7,9 @@ from sklearn import preprocessing
 class MyKNNClassifier(KNNClassifier):
     
     def __init__(self, 
-                 n_neighbors=8, 
-                 max_window_size=2000, 
-                 leaf_size=40, 
+                 n_neighbors=5, 
+                 max_window_size=1000, 
+                 leaf_size=30, 
                  metric='euclidean', 
                  weighted_vote=False,
                  standardize=False):
@@ -37,8 +37,8 @@ class MyKNNClassifier(KNNClassifier):
             votes = [0.0 for _ in range(int(max(self.classes) + 1))]
             for index in new_ind[i]:
                 # Calculate votes by adding 1/distance
-                if self.weighted_vote:
-                    votes[int(self.data_window.targets_buffer[index])] += 1. / float(dist_list[i][count])
+                #if self.weighted_vote:
+                    #votes[int(self.data_window.targets_buffer[index])] += 1. / float(dist_list[i][count])
                 votes[int(self.data_window.targets_buffer[index])] += 1. / len(new_ind[i])
                 count = count + 1
             proba.append(votes)
@@ -51,7 +51,7 @@ class MyKNNClassifier(KNNClassifier):
         standardization = (X-X_mean) / X_std
         return standardization
         
-
+'''
 # Setting up the stream
 stream = SEAGenerator(random_state=1, noise_percentage=.1)
 knn = MyKNNClassifier(weighted_vote=True)
@@ -71,3 +71,4 @@ while n_samples < 5000:
 # Displaying results
 print('{} samples analyzed.'.format(n_samples))
 print("KNNClassifier's performance: {}".format(corrects/n_samples))
+'''
