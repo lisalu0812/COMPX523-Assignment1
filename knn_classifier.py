@@ -2,7 +2,8 @@ from skmultiflow.lazy import KNNClassifier
 from skmultiflow.data import SEAGenerator
 from skmultiflow.utils.utils import *
 from sklearn import preprocessing   
-
+from skmultiflow.data import FileStream
+from skmultiflow.evaluation import EvaluatePrequential
 
 class MyKNNClassifier(KNNClassifier):
     
@@ -21,6 +22,8 @@ class MyKNNClassifier(KNNClassifier):
         self.standardize = standardize
         
     def predict_proba(self,X):
+        if self.standardize:
+            X = self.CalculateStandardization(X)
         r, c = get_dimensions(X)
         if self.data_window is None or self.data_window.size < self.n_neighbors:
             # The model is empty, defaulting to zero
@@ -33,16 +36,29 @@ class MyKNNClassifier(KNNClassifier):
         new_dist, new_ind = self._get_neighbors(X)
         dist_list = new_dist.tolist()
         count = 0
+    
         for i in range(r):
             votes = [0.0 for _ in range(int(max(self.classes) + 1))]
             for index in new_ind[i]:
                 # Calculate votes by adding 1/distance
-                #if self.weighted_vote:
-                    #votes[int(self.data_window.targets_buffer[index])] += 1. / float(dist_list[i][count])
-                votes[int(self.data_window.targets_buffer[index])] += 1. / len(new_ind[i])
+                if self.weighted_vote:
+                    votes[int(self.data_window.targets_buffer[index])] += 1. / float(dist_list[i][count])
+                else: 
+                    votes[int(self.data_window.targets_buffer[index])] += 1. / len(new_ind[i])
                 count = count + 1
             proba.append(votes)
         return np.asarray(proba)
+    
+    def partial_fit(self, X, y, classes=None, sample_weight=None):
+        if self.standardize:
+            X = self.CalculateStandardization(X)
+        r, c = get_dimensions(X)
+        if classes is not None:
+            self.classes = list(set().union(self.classes, classes))
+
+        for i in range(r):
+            self.data_window.add_sample(X[i], y[i])
+        return self
     
     def CalculateStandardization(self,X):
         X = X.astype(float)
@@ -50,7 +66,21 @@ class MyKNNClassifier(KNNClassifier):
         X_std = X.std()
         standardization = (X-X_mean) / X_std
         return standardization
-        
+'''
+stream = FileStream(r"C:\Users\luyj0\OneDrive\Desktop\COMPX523-Data Stream Mining\data_n30000.csv")
+#knn = MyKNNClassifier(weighted_vote=True)
+s_knn = MyKNNClassifier(standardize=True)
+metrics = ['accuracy', 'kappa', 'kappa_m','kappa_t', 'running_time', 'model_size']
+# use a test-then-train evaluation approach
+evaluator = EvaluatePrequential(max_samples=30000,
+                                n_wait=100,
+                                show_plot=False,
+                                metrics=metrics)
+evaluator.evaluate(stream=stream,model=[s_knn],model_names=['KNN + standardize'])
+#evaluator.evaluate(stream=stream,model=[knn],model_names=['KNN'])
+
+'''
+
 '''
 # Setting up the stream
 stream = SEAGenerator(random_state=1, noise_percentage=.1)
